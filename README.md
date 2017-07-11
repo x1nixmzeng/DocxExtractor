@@ -60,6 +60,12 @@ $firstSentence->br = 2; // Two line breaks before this sentence
 echo $firstSentence->text; // The quick brown fox jumps over the lazy dog
 $firstSentence->text = "Several fabulous dixieland jazz groups played with quick tempo.";
 
+// Print the whole document as HTML
+foreach($mapping as $node) {
+	print $node->toHTML() . '<br/>';
+}
+```
+
 
 License
 ---------
