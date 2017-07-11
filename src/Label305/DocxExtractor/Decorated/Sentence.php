@@ -49,6 +49,8 @@ class Sentence {
         $this->italic = $italic;
         $this->underline = $underline;
         $this->br = $br;
+		$this->anchorName = $anchorName;
+		$this->anchorId = $anchorId;
     }
 
     /**
@@ -73,7 +75,7 @@ class Sentence {
         $value .= "</w:rPr>";
 		
 		if( $this->anchorName != null ) {
-			$value .= '<w:bookmarkStart w:colFirst="0" w:colLast="0" w:name=' . $this->anchorName . '" w:id="' . $this->anchorId . '"/>';
+			$value .= '<w:bookmarkStart w:colFirst="0" w:colLast="0" w:name="' . $this->anchorName . '" w:id="' . $this->anchorId . '"/>';
 			$value .= '<w:bookmarkEnd w:id="' . $this->anchorId .'"/>';
 		}
 
@@ -110,7 +112,7 @@ class Sentence {
         }
 
 		if($this->anchorName !=null ) {
-			$value .= "<a name=" . $this->anchorName . ">";
+			$value .= '<a name="' . $this->anchorName . '">';
 		}
 		
         if ($this->bold && $firstWrappedInBold) {
