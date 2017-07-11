@@ -1,9 +1,9 @@
 {
-    "name": "label305/docx-extractor",
+    "name": "x1nixmzeng/docx-extractor",
     "type": "library",
-    "description": "PHP library for extracting string data in .docx files.",
-    "keywords": ["Docx", "Extractor"],
-    "homepage": "https://github.com/Label305/DocxExtractor",
+    "description": "PHP library for extracting data from DOCX files.",
+    "keywords": ["docx", "extractor"],
+    "homepage": "https://github.com/x1nixmzeng/DocxExtractor",
     "license": "Apache-2.0",
     "authors": [
         {
