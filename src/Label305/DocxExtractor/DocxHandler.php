@@ -90,59 +90,7 @@ abstract class DocxHandler {
             "archive" => $temp
         ];
     }
-
-    /**
-     * @param $dom
-     * @param $archiveLocation
-     * @param $saveLocation
-     * @throws DocxFileException
-     */
-    protected function saveDocument($dom, $archiveLocation, $saveLocation)
-    {
-        if(!file_exists($archiveLocation)) {
-            throw new DocxFileException( 'Archive should exist: '. $archiveLocation );
-        }
-
-        $documentXMLLocation = $archiveLocation . DIRECTORY_SEPARATOR . 'word' . DIRECTORY_SEPARATOR . 'document.xml';
-        $newDocumentXMLContents = $dom->saveXml();
-        file_put_contents($documentXMLLocation, $newDocumentXMLContents);
-
-        //Create a docx file again
-        $zip = new ZipArchive;
-
-        $opened = $zip->open($saveLocation, ZIPARCHIVE::CREATE | ZipArchive::OVERWRITE);
-        if ($opened !== true) {
-            throw new DocxFileException( 'Cannot open zip: ' . $saveLocation . ' [' . $opened . ']' );
-        }
-
-        // Create recursive directory iterator
-        $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($archiveLocation), RecursiveIteratorIterator::LEAVES_ONLY);
-
-        foreach($files as $name => $file) {
-
-            $filePath = $file->getRealPath();
-
-            if (in_array($file->getFilename(), array('.', '..'))) {
-                continue;
-            }
-
-            if (!file_exists($filePath)) {
-                throw new DocxFileException( 'File does not exists: ' . $file->getPathname() );
-            } else {
-                if (!is_readable($filePath)) {
-                    throw new DocxFileException( 'File is not readable: ' . $file->getPathname() );
-                } else {
-                    if (!$zip->addFile($filePath, substr($file->getPathname(), strlen($archiveLocation) + 1))) {
-                        throw new DocxFileException( 'Error adding file: ' . $file->getPathname() );
-                    }
-                }
-            }
-        }
-        if (!$zip->close()) {
-            throw new DocxFileException( 'Could not create zip file' );
-        }
-    }
-
+	
     /**
      * Helper to remove tmp dir
      *

@@ -31,8 +31,18 @@ class Sentence {
      * @var int Number of line breaks
      */
     public $br;
+	
+    /**
+     * @var string of bookmark anchor name
+     */
+    public $anchorName;
+	
+	/**
+     * @var integer for the bookmark identifier
+     */
+    public $anchorId;
 
-    function __construct($text, $bold, $italic, $underline, $br)
+    function __construct($text, $bold, $italic, $underline, $br, $anchorName, $anchorId)
     {
         $this->text = $text;
         $this->bold = $bold;
@@ -61,6 +71,11 @@ class Sentence {
         }
 
         $value .= "</w:rPr>";
+		
+		if( $this->anchorName != null ) {
+			$value .= '<w:bookmarkStart w:colFirst="0" w:colLast="0" w:name=' . $this->anchorName . '" w:id="' . $this->anchorId . '"/>';
+			$value .= '<w:bookmarkEnd w:id="' . $this->anchorId .'"/>';
+		}
 
         for ($i = 0; $i < $this->br; $i++) {
             $value .= "<w:br/>";
@@ -94,6 +109,10 @@ class Sentence {
             $value .= "<br />";
         }
 
+		if($this->anchorName !=null ) {
+			$value .= "<a name=" . $this->anchorName . ">";
+		}
+		
         if ($this->bold && $firstWrappedInBold) {
             $value .= "<strong>";
         }
@@ -115,9 +134,12 @@ class Sentence {
         if ($this->bold && $lastWrappedInBold) {
             $value .= "</strong>";
         }
+		
+		if($this->anchorName !=null ) {
+			$value .= "</a>";
+		}
 
         return $value;
     }
-
 
 }

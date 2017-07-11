@@ -26,20 +26,17 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor {
 
     /**
      * @param $originalFilePath
-     * @param $mappingFileSaveLocationPath
      * @throws DocxParsingException
      * @throws DocxFileException
      * @return Array The mapping of all the strings
      */
-    public function extractStringsAndCreateMappingFile($originalFilePath, $mappingFileSaveLocationPath)
+    public function extractStrings($originalFilePath)
     {
         $prepared = $this->prepareDocumentForReading($originalFilePath);
 
         $this->nextTagIdentifier = 0;
         $result = $this->replaceAndMapValues($prepared['dom']->documentElement);
-
-        $this->saveDocument($prepared['dom'], $prepared["archive"], $mappingFileSaveLocationPath);
-
+		
         return $result;
     }
 
@@ -85,10 +82,18 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor {
             $firstTextChild = null;
             $otherNodes = [];
             $parts = new Paragraph();
+			$anchorName = null;
+			$anchorId = 0;
 
             foreach ($paragraph->childNodes as $paragraphChild) {
+				
+				if ($paragraphChild instanceof DOMElement && $paragraphChild->nodeName == "w:bookmarkStart") {
+					$anchorName = $paragraphChild->getAttribute('w:name');
+					$anchorId = $paragraphChild->getAttribute('w:id');
+				}
+				
                 if ($paragraphChild instanceof DOMElement && $paragraphChild->nodeName == "w:r") {
-                    $paragraphPart = $this->parseRNode($paragraphChild);
+                    $paragraphPart = $this->parseRNode($paragraphChild, $anchorName, $anchorId);
                     if ($paragraphPart !== null) {
                         $parts[] = $paragraphPart;
                         if ($firstTextChild === null) {
@@ -101,10 +106,6 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor {
             }
 
             if ($firstTextChild !== null) {
-                $replacementNode = new DOMText();
-                $replacementNode->nodeValue = "%" . $this->nextTagIdentifier . "%";
-                $paragraph->replaceChild($replacementNode, $firstTextChild);
-
                 foreach ($otherNodes as $otherNode) {
                     $paragraph->removeChild($otherNode);
                 }
@@ -117,13 +118,14 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor {
         return $result;
     }
 
-    protected function parseRNode(DOMElement $rNode)
+    protected function parseRNode(DOMElement $rNode, $anchorName, $anchorId)
     {
         $bold = false;
         $italic = false;
         $underline = false;
         $brCount = 0;
         $text = null;
+		$bmCount = 0;
 
         foreach ($rNode->childNodes as $rChild) {
 
@@ -147,7 +149,6 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor {
                 } else {
                     $text = trim(implode($this->parseText($rChild)), " ");
                 }
-
             }
 
             if ($rChild instanceof DOMElement && $rChild->nodeName == "w:br") {
@@ -156,7 +157,7 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor {
         }
 
         if ($text != null) {
-            return new Sentence($text, $bold, $italic, $underline, $brCount);
+			return new Sentence($text, $bold, $italic, $underline, $brCount, $anchorName, $anchorId);
         } else {
             return null;
         }
